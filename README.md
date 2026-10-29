@@ -1,0 +1,1 @@
+# frappe-apps-manager-plugin-1.2
