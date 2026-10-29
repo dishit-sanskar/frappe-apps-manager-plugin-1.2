@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "frappe": {
+      "type": "http",
+      "url": "${FRAPPE_SITE_URL:-http://dev.localhost:8000}/api/v2/mcp",
+      "headers": {
+        "Authorization": "token ${FRAPPE_API_KEY:-}:${FRAPPE_API_SECRET:-}"
+      }
+    }
+  }
+}

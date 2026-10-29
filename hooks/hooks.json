@@ -1,0 +1,144 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/destructive_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f 'sites/common_site_config.json' ]; then echo '\u2713 Frappe bench detected'; else echo '\u26a0 Not in Frappe bench directory'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if [[ \"$file_path\" == *test_*.py ]]; then if [[ \"$file_path\" != */doctype/* ]] && [[ \"$file_path\" != */tests/* ]]; then echo '\u26a0 Test files should be in doctype/ or tests/ directory'; fi; fi; }"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/task_guard.py\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*frappe.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/mcp_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/lint_written_file.py\"",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if [[ \"$file_path\" == *.json ]] && [[ \"$file_path\" == */doctype/* ]]; then echo '\ud83d\udca1 Reminder: Run migrations with /frappe-migrate'; fi; }"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if [[ \"$file_path\" == *.py ]] && [[ \"$file_path\" == */doctype/*.py ]] && [[ \"$file_path\" != *test_*.py ]]; then echo '\u2713 Code updated. Consider running tests with /frappe-test'; fi; }"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if [[ \"$file_path\" == *.js ]] && [[ \"$file_path\" == */doctype/*.js ]]; then echo '\ud83d\udca1 Reminder: Clear cache with /frappe-cache for JS changes to take effect'; fi; }"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/task_guard.py\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.prompt // empty' | grep -qiE 'frappe|bench|doctype|migrate' || exit 0; echo '\ud83d\udd0d Checking Frappe bench setup...'; if [ -f 'sites/common_site_config.json' ]; then echo '\u2713 Valid bench directory'; bench --version 2>/dev/null || echo '\u26a0 Bench command not found'; else echo '\u274c Not a Frappe bench directory'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.prompt // empty' | grep -qiE 'site|test|migrate|backup|console' || exit 0; if [ -f 'sites/common_site_config.json' ]; then site_count=$(ls -d sites/*/ 2>/dev/null | wc -l); if [ $site_count -gt 0 ]; then echo \"\u2713 Found $site_count site(s)\"; else echo '\u26a0 No sites found. Create one with /frappe-new-site'; fi; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.prompt // empty' | grep -qiE 'cache|redis|clear[[:space:]]+cache' || exit 0; if command -v redis-cli >/dev/null 2>&1; then if redis-cli ping >/dev/null 2>&1; then echo '\u2713 Redis is running'; else echo '\u26a0 Redis is not responding. Start with: sudo systemctl start redis-server'; fi; fi"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/agent_metrics.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

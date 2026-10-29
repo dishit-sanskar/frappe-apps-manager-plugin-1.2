@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build From Docs Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a job-card manual. Sticky contents rail on the left, one reading column, each phase a numbered "operation". */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #18212b;
+  --muted: #5a6573;
+  --line: #d9dee5;
+  --accent: #1d5c86;
+  --accent-soft: #e3eef6;
+  --gate: #a8461c;
+  --gate-soft: #f8e9e1;
+  --ok: #2c7a4b;
+  --ok-soft: #e2f1e8;
+  --code-bg: #eef1f4;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161c; --surface: #18202a; --ink: #e4e9ef; --muted: #9aa6b4; --line: #2b3643;
+    --accent: #6fb0dc; --accent-soft: #1b2e3d; --gate: #e98a5c; --gate-soft: #3a2419;
+    --ok: #6cc292; --ok-soft: #1a3226; --code-bg: #0d1217; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161c; --surface: #18202a; --ink: #e4e9ef; --muted: #9aa6b4; --line: #2b3643;
+  --accent: #6fb0dc; --accent-soft: #1b2e3d; --gate: #e98a5c; --gate-soft: #3a2419;
+  --ok: #6cc292; --ok-soft: #1a3226; --code-bg: #0d1217; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.65 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+.page { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 56px; padding-block: 40px 96px; }
+@media (max-width: 900px) { .page { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 24px 64px; } }
+
+/* contents rail */
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; font-size: 14px; }
+nav.toc .label { font: 700 11px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; border-left: 1px solid var(--line); }
+nav.toc a { display: block; padding: 4px 0 4px 14px; margin-left: -1px; border-left: 2px solid transparent; color: var(--muted); text-decoration: none; }
+nav.toc a:hover { color: var(--ink); border-left-color: var(--line); }
+nav.toc a.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+@media (max-width: 900px) {
+  nav.toc { position: static; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  nav.toc ol { columns: 2; column-gap: 16px; display: block; border: 0; }
+  nav.toc a { padding-left: 0; border: 0; }
+}
+@media (max-width: 460px) { nav.toc ol { columns: 1; } }
+
+main { min-width: 0; max-width: 760px; }
+
+/* type */
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(34px, 5vw, 48px); font-weight: 800; letter-spacing: -.01em; }
+h2 { font-size: 27px; font-weight: 700; display: flex; align-items: baseline; gap: 12px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; }
+h2 .op { font: 500 13px/1 var(--font-mono); color: var(--accent); background: var(--accent-soft); padding: 5px 7px; border-radius: 4px; flex: none; transform: translateY(-3px); }
+p, ul, ol { margin: 12px 0 0; }
+li + li { margin-top: 4px; }
+.lead { font-size: 18px; color: var(--muted); max-width: 62ch; margin-top: 16px; }
+.eyebrow { font: 700 12px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--gate); }
+section { padding-top: 56px; scroll-margin-top: 16px; }
+section > p, section > ul, section > ol { max-width: 66ch; }
+strong { font-weight: 600; }
+
+header.hero { display: grid; gap: 4px; padding-bottom: 8px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.chip { font: 500 12.5px/1 var(--font-mono); padding: 6px 9px; border-radius: 4px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+
+/* pipeline strip */
+.pipeline { margin-top: 28px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.pipeline > div { padding: 14px 12px; border-right: 1px solid var(--line); display: grid; gap: 4px; align-content: start; }
+.pipeline > div:last-child { border-right: 0; }
+.pipeline .n { font: 500 12px/1 var(--font-mono); color: var(--muted); }
+.pipeline .t { font: 700 14.5px/1.25 var(--font-display); }
+.pipeline .w { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.pipeline .gate { background: var(--gate-soft); }
+.pipeline .gate .n { color: var(--gate); }
+@media (max-width: 760px) { .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pipeline > div { border-bottom: 1px solid var(--line); } }
+
+/* code */
+.code { position: relative; margin-top: 14px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 400 13.5px/1.6 var(--font-mono); white-space: pre; }
+.code .cap { font: 500 11px/1 var(--font-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 10px 16px 0; }
+.copy { position: absolute; top: 8px; right: 8px; font: 500 12px/1 var(--font-body); padding: 6px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; }
+.copy:hover { color: var(--ink); }
+code { font: 400 .88em var(--font-mono); background: var(--code-bg); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+
+/* tables */
+.table { margin-top: 16px; overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font: 600 12px/1.3 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+td:first-child { font-weight: 500; }
+
+/* callouts */
+.note { margin-top: 18px; padding: 14px 16px; border-radius: 6px; background: var(--accent-soft); font-size: 15px; max-width: 66ch; }
+.note.gate { background: var(--gate-soft); }
+.note.ok { background: var(--ok-soft); }
+.note b { font-family: var(--font-display); }
+
+/* step list: a real sequence, so numbered */
+ol.steps { list-style: none; padding: 0; counter-reset: s; display: grid; gap: 14px; margin-top: 18px; max-width: 66ch; }
+ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; margin: 0; }
+ol.steps > li::before { content: counter(s); font: 500 13px/26px var(--font-mono); text-align: center; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--accent); }
+ol.steps > li > div > p:first-child { margin-top: 2px; }
+
+/* checkpoint sample */
+.terminal { margin-top: 14px; background: var(--code-bg); border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 6px; overflow-x: auto; }
+.terminal pre { margin: 0; padding: 14px 16px; font: 400 13px/1.6 var(--font-mono); white-space: pre; }
+
+.checklist { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; font: 400 13.5px/1.7 var(--font-mono); overflow-x: auto; white-space: pre; }
+.checklist .rej { color: var(--gate); }
+
+/* skills reference */
+.sub { color: var(--muted); font-size: 14.5px; margin-top: 6px; }
+.filter { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 1; }
+.filter label { font: 600 12px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.filter input { flex: 1 1 200px; min-width: 0; font: 400 15px/1.4 var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; }
+.filter input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#skill-count { font: 500 12.5px/1 var(--font-mono); color: var(--muted); }
+#skills td:first-child code, #agents td:first-child code { white-space: nowrap; }
+
+footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav class="toc" aria-label="Contents">
+  <div class="label">Contents</div>
+  <ol>
+    <li><a href="#overview">What it does</a></li>
+    <li><a href="#before">Before you start</a></li>
+    <li><a href="#setup">One-time setup</a></li>
+    <li><a href="#start">Start a build</a></li>
+    <li><a href="#phase0">Phase 0 · Preflight</a></li>
+    <li><a href="#phase1">Phase 1 · Requirements</a></li>
+    <li><a href="#phase2">Phase 2 · Design</a></li>
+    <li><a href="#phase3">Phase 3 · Slices</a></li>
+    <li><a href="#tasks">Tasks and checkpoints</a></li>
+    <li><a href="#review">Reviewing a checklist</a></li>
+    <li><a href="#phase4">Phase 4 · Finish</a></li>
+    <li><a href="#resume">Pause and resume</a></li>
+    <li><a href="#guards">Safety guards</a></li>
+    <li><a href="#files">Files it creates</a></li>
+    <li><a href="#learn">Lessons and metrics</a></li>
+    <li><a href="#solo">Skills and agents alone</a></li>
+    <li><a href="#agents">Agents</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#trouble">Troubleshooting</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="hero">
+  <div class="eyebrow">frappe-apps-manager · Claude Code plugin</div>
+  <h1>Build an ERPNext app from requirement documents</h1>
+  <p class="lead">How to take a BRD, To-Be process or FRS and turn it into a working ERPNext v16 custom app with <code>/frappe-build-from-docs</code>: one feature slice at a time, with you approving every flow, the plan and each slice.</p>
+  <div class="meta">
+    <span class="chip">Frappe / ERPNext v16.53+</span>
+    <span class="chip">local bench</span>
+    <span class="chip">dev site + test site</span>
+    <span class="chip">git-tracked app</span>
+  </div>
+</header>
+
+<section id="overview">
+  <h2>What it does</h2>
+  <p>Claude runs as the <strong>orchestrator</strong>. It runs every <code>bench</code> command and hands focused work to specialist agents. Nothing moves forward without your approval at three kinds of gate: the business flows, the build plan, and each finished slice.</p>
+  <div class="pipeline" role="list">
+    <div role="listitem"><span class="n">Phase 0</span><span class="t">Preflight</span><span class="w">Checks bench, sites, app, MCP</span></div>
+    <div role="listitem"><span class="n">Phase 1</span><span class="t">Requirements</span><span class="w">Business Analyst: register, fit-gap, flows</span></div>
+    <div role="listitem" class="gate"><span class="n">Gate 1</span><span class="t">Flows approved</span><span class="w">You tick each flow</span></div>
+    <div role="listitem"><span class="n">Phase 2</span><span class="t">Design</span><span class="w">Architect: design.yaml, slices</span></div>
+    <div role="listitem" class="gate"><span class="n">Gate 2</span><span class="t">Plan approved</span><span class="w">You tick the build order</span></div>
+    <div role="listitem"><span class="n">Phase 3–4</span><span class="t">Slices, then sign-off</span><span class="w">Build, test, review each slice; docs at the end</span></div>
+  </div>
+  <p>A <strong>slice</strong> is one business document end to end: its DocTypes, fields added to standard DocTypes, server logic, form UI, print formats, reports, permissions and tests. The next slice starts only when every item of the current one is approved.</p>
+
+  <h3>Who does what</h3>
+  <div class="table"><table>
+    <thead><tr><th>Phase</th><th>Agent</th><th>Produces</th></tr></thead>
+    <tbody>
+      <tr><td>1 Requirements</td><td>Business Analyst</td><td><code>01-requirements.md</code>, <code>02-fit-gap.md</code>, <code>flows.yaml</code></td></tr>
+      <tr><td>2 Design</td><td>Architect</td><td><code>design.yaml</code> for all slices; ADRs for real decisions</td></tr>
+      <tr><td>3 Logic</td><td>Developer</td><td>Controllers, overrides, services, server tests</td></tr>
+      <tr><td>3 UI</td><td>UI/UX</td><td>Form scripts, list views, print formats, report filters</td></tr>
+      <tr><td>3 Verify</td><td>Tester</td><td>Acceptance tests written from the brief, not the code</td></tr>
+      <tr><td>4 Docs</td><td>Technical Writer</td><td>User guide per role, admin guide</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="before">
+  <h2>Before you start</h2>
+  <p>Everything below must be in place on your machine. Preflight checks them and reports all failures together.</p>
+  <div class="table"><table>
+    <thead><tr><th>Need</th><th>Why</th><th>How to check</th></tr></thead>
+    <tbody>
+      <tr><td>Frappe and ERPNext 16.x, Frappe ≥ 16.53</td><td>The built-in MCP server arrived in Frappe 16.53.0</td><td><code>bench version</code></td></tr>
+      <tr><td>Dev site with <code>developer_mode: 1</code></td><td>The app's DocTypes are written as files</td><td><code>sites/&lt;site&gt;/site_config.json</code></td></tr>
+      <tr><td>Test site with <code>allow_tests</code></td><td>Tests never touch the dev site you review on</td><td><code>bench --site test.localhost list-apps</code></td></tr>
+      <tr><td>Your app in <code>apps/</code>, a git repo with a clean tree</td><td>Each task and slice is checkpointed in git</td><td><code>git -C apps/&lt;app&gt; status</code></td></tr>
+      <tr><td><code>bench start</code> running</td><td>Browser check, MCP and the desk need the server</td><td>Open the site in a browser</td></tr>
+      <tr><td>Node.js</td><td>The headless browser check of every desk page</td><td><code>node --version</code></td></tr>
+      <tr><td>Requirement documents</td><td>.docx preferred; .doc and .pdf accepted</td><td>One folder, e.g. <code>../requirements/&lt;project&gt;</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>No test site yet? Create it yourself, because it needs the database root password:</p>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><code>bench new-site test.localhost --admin-password admin --install-app erpnext --install-app &lt;app&gt;
+bench --site test.localhost set-config allow_tests true</code></pre></div>
+</section>
+
+<section id="setup">
+  <h2>One-time setup</h2>
+  <ol class="steps">
+    <li><div>
+      <p><strong>Create an API user on the dev site.</strong> Give it a separate login (e.g. <code>ai-dev@local</code>) with only the roles the agents need to read. Never use Administrator, and never use a production site. Open the user, go to <em>API Access</em> and click <em>Generate Keys</em>.</p>
+    </div></li>
+    <li><div>
+      <p><strong>Turn on MCP.</strong> System Settings → <em>AI Agents</em> tab → tick <em>Enable MCP</em>. It is on by default for new sites. No <em>AI Agents</em> tab means your Frappe is older than 16.53; update it first (see <a href="#trouble">Troubleshooting</a>).</p>
+    </div></li>
+    <li><div>
+      <p><strong>Save your connection settings</strong> in a file outside any git repo, for example <code>~/.frappe-mcp.env</code>. The API keys only work on the site that issued them.</p>
+      <div class="code"><button class="copy" type="button">Copy</button><pre><code>export FRAPPE_SITE_URL=http://newproj.localhost:8000
+export FRAPPE_API_KEY=your_api_key
+export FRAPPE_API_SECRET=your_api_secret
+export FRAPPE_PASSWORD=administrator_password   # for the browser check
+# optional: company knowledge base shared across projects
+export FRAPPE_KB_DIR=~/.claude/frappe-kb</code></pre></div>
+    </div></li>
+    <li><div>
+      <p><strong>Test the MCP endpoint.</strong> Opening the URL in a browser shows <em>"Only POST is supported"</em>, which is normal. Test with a POST instead:</p>
+      <div class="code"><button class="copy" type="button">Copy</button><pre><code>source ~/.frappe-mcp.env
+curl -s -X POST $FRAPPE_SITE_URL/api/v2/mcp \
+  -H "Authorization: token $FRAPPE_API_KEY:$FRAPPE_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | head -c 400</code></pre></div>
+      <p>You should see tool names such as <code>search_doctypes</code> and <code>get_doctype_schema</code>. <code>AuthenticationError</code> means the key or secret is wrong, or belongs to another site.</p>
+    </div></li>
+    <li><div>
+      <p><strong>Load the plugin.</strong> While trying out a new version, point Claude at the plugin folder directly:</p>
+      <div class="code"><button class="copy" type="button">Copy</button><pre><code>cd ~/path/to/frappe-bench
+source ~/.frappe-mcp.env
+claude --plugin-dir /home/sanskar/Downloads/frappe-apps-manager/2.1.0</code></pre></div>
+      <p>To make it permanent, copy the folder into your marketplace folder, raise <code>version</code> in <code>.claude-plugin/plugin.json</code> (the install cache is keyed by version), then run <code>/plugin marketplace update &lt;marketplace&gt;</code> and reinstall. If an older copy is also installed, turn it off with <code>claude plugin disable frappe-apps-manager@&lt;marketplace&gt;</code>.</p>
+    </div></li>
+    <li><div>
+      <p><strong>Check inside Claude.</strong> <code>/mcp</code> shows <code>plugin:frappe-apps-manager:frappe</code> with a ✔. <code>/agents</code> lists the <code>frappe-*</code> agents. <code>/hooks</code> shows <code>destructive_guard</code>, <code>task_guard</code>, <code>mcp_guard</code> and <code>agent_metrics</code>.</p>
+    </div></li>
+  </ol>
+</section>
+
+<section id="start">
+  <h2>Start a build</h2>
+  <p>Always start Claude from the <strong>bench folder</strong>. Then run:</p>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><code>/frappe-apps-manager:frappe-build-from-docs ../requirements/newproj --site newproj.localhost --test-site newproj-test.localhost --app newproj</code></pre></div>
+  <div class="table"><table>
+    <thead><tr><th>Argument</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>documents</td><td>A folder or files: BRD, To-Be process, FRS, SRS</td></tr>
+      <tr><td><code>--site</code></td><td>Dev site you review on. Defaults to the only site</td></tr>
+      <tr><td><code>--test-site</code></td><td>Site the tests run on. Defaults to <code>test.localhost</code></td></tr>
+      <tr><td><code>--app</code></td><td>Your custom app in <code>apps/</code></td></tr>
+      <tr><td><code>--from</code></td><td>Restart from a phase or slice, e.g. <code>2</code> or <code>S03</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="phase0">
+  <h2><span class="op">Phase 0</span>Preflight</h2>
+  <p>Runs on every start and every resume. It checks versions, both sites, the server, the browser-check password, a clean app repo and the MCP connection. Then it asks you two questions, once per project, and records the answers in <code>STATUS.md</code>:</p>
+  <ul>
+    <li><strong>Commit approved slices automatically?</strong> If yes, each approved slice becomes one commit: <code>feat: &lt;slice title&gt; (S03)</code>.</li>
+    <li><strong>When to pause during a slice:</strong></li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Pause mode</th><th>Stops for you</th><th>Use when</th></tr></thead>
+    <tbody>
+      <tr><td><code>on-issue</code></td><td>Only on failing tests, out-of-scope changes, schema requests or open questions</td><td>Normal work (recommended)</td></tr>
+      <tr><td><code>every-task</code></td><td>After every task</td><td>The first slices of a new project, or after a plugin update</td></tr>
+      <tr><td><code>per-group</code></td><td>After all tasks of one DocType</td><td>You want a look per document</td></tr>
+      <tr><td><code>slice</code></td><td>Only at the slice review checklist</td><td>A well-known pattern you trust</td></tr>
+    </tbody>
+  </table></div>
+  <p>You can change the mode later by editing the <code>Pause during a slice:</code> line in <code>docs/spec/STATUS.md</code>. The new mode applies from the next slice.</p>
+</section>
+
+<section id="phase1">
+  <h2><span class="op">Phase 1</span>Requirements and flow approval</h2>
+  <ol class="steps">
+    <li><div><p>The <strong>Business Analyst</strong> converts the documents and writes a requirements register with stable IDs (<code>BR-</code>, <code>FR-</code>, <code>PS-</code>…), a fit-gap against standard ERPNext v16, and every business flow step by step. With MCP connected, it checks real fields and existing customisations on your site.</p></div></li>
+    <li><div><p><strong>One questionnaire.</strong> Every open question (<code>OQ-</code>) comes with a proposed default. You answer the ones that change scope or design, and can accept the rest as defaults in one go.</p></div></li>
+    <li><div><p><strong>Gate 1.</strong> You get <code>docs/spec/review/flows-review.md</code>, one item per flow and per assumption, each with an explanation, a Mermaid diagram, the steps, the roles involved, and what is standard versus developed. Review it (see <a href="#review">Reviewing a checklist</a>) and say <em>review done</em>.</p></div></li>
+  </ol>
+  <div class="note gate"><b>Gate.</b> Rejected flows go back to the analyst and come back in the next round with a note saying what changed. Phase 2 starts only when every flow is approved.</div>
+</section>
+
+<section id="phase2">
+  <h2><span class="op">Phase 2</span>Design and plan approval</h2>
+  <p>The <strong>Architect</strong> writes <code>docs/spec/design.yaml</code>, the single source for every slice. It covers new DocTypes, custom fields on standard DocTypes, roles, workflows, reports and print formats, plus <code>rules:</code> (business rules with their document event) and <code>requirements:</code> (which code owns which ID). Slices follow the To-Be process with foundations first: roles, settings, warehouses. <code>slice_tool.py validate</code> must pass.</p>
+  <p><strong>Gate 2:</strong> <code>docs/spec/review/plan-review.md</code> shows the build order and, per slice, what ERPNext already covers and what will be developed. Approve it the same way.</p>
+  <div class="note">Existing project? The architect describes what is already built as slices marked <code>generate: false</code>. Those still go through a review checklist, so you approve them like any other slice.</div>
+</section>
+
+<section id="phase3">
+  <h2><span class="op">Phase 3</span>Slices, strictly one at a time</h2>
+  <ol class="steps">
+    <li><div><p><strong>Start.</strong> Claude records the base commit and tells you what the slice will deliver.</p></div></li>
+    <li><div><p><strong>Generate.</strong> Writes DocType JSON, custom fields, roles and workflows as fixtures, plus stub files from <code>design.yaml</code>. Each business rule becomes a method containing a <code>TODO(rule FR-…)</code> placeholder, and each rule gets a skipped test. Claude wires <code>hooks.py</code> and migrates both sites.</p></div></li>
+    <li><div><p><strong>Brief.</strong> <code>slices/S03-&lt;title&gt;.md</code>: the data model, rules and acceptance criteria the agents work from.</p></div></li>
+    <li><div><p><strong>Build in small tasks.</strong> The slice is split into tasks of at most 4 requirements each. The Developer and UI/UX lines run in parallel, with a checkpoint after every task. See <a href="#tasks">Tasks and checkpoints</a>.</p></div></li>
+    <li><div><p><strong>Integrate.</strong> Claude applies the agents' requests (usually <code>hooks.py</code>), migrates, clears the cache, and builds assets if <code>public/</code> changed.</p></div></li>
+    <li><div><p><strong>Tester.</strong> Writes acceptance tests from the brief in <code>tests/acceptance/test_s03.py</code> and runs them with the slice's other tests on the test site. It reports failures, but never fixes product code.</p></div></li>
+    <li><div><p><strong>Fix.</strong> Each failure goes to the agent that owns the file, for at most 2 rounds. Still failing after that, Claude stops and asks you.</p></div></li>
+    <li><div><p><strong>Browser check.</strong> A headless browser logs in and opens every new desk page. Console errors, failed requests, error dialogs or blank pages go back to the owner. Screenshots are saved in <code>slices/S03-shots/</code>.</p></div></li>
+    <li><div><p><strong>Trace.</strong> <code># REQ: FR-xxx</code> tags in the code are collected into the traceability matrix.</p></div></li>
+    <li><div><p><strong>Review checklist.</strong> <code>slices/S03-&lt;title&gt;-review.md</code> lists everything built, item by item, with links into the site. Claude stops and waits for you.</p></div></li>
+    <li><div><p><strong>Approval.</strong> Once every item is approved, the slice is marked <code>approved</code> and committed if you allowed that. Rejected items become lessons, and the slice is archived as a reusable pattern. After the first slice, Claude writes <code>conventions.md</code> for later slices to copy.</p></div></li>
+  </ol>
+</section>
+
+<section id="tasks">
+  <h2>Tasks and checkpoints</h2>
+  <p>Long agent runs are slow, costly and hard to follow, so each slice is cut into small tasks. A typical split for one slice:</p>
+  <div class="table"><table>
+    <thead><tr><th>Line</th><th>Tasks</th></tr></thead>
+    <tbody>
+      <tr><td>Developer</td><td>One per new DocType controller · logic on each standard DocType (overrides, services) · report data · permissions · remaining rules</td></tr>
+      <tr><td>UI/UX</td><td>Form and list view per DocType · form script per standard DocType · print format · report filters</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>How each task runs</h3>
+  <ol class="steps">
+    <li><div><p><code>next</code> takes a git snapshot, writes the task prompt (rules, conventions, lessons, earlier handoffs, function signatures, similar past slices) and arms the guard for that task's files.</p></div></li>
+    <li><div><p>The agent works on that one task only. Low-complexity tasks run on a faster, cheaper model. The same agent is kept for the next task only if it is in the same DocType group, finished less than 5 minutes ago and has done fewer than 2 tasks. Otherwise a fresh agent starts, because a stale agent costs more to resume.</p></div></li>
+    <li><div><p>The agent writes a short report, <code>S03-tasks/T01.json</code>, and replies with one line.</p></div></li>
+    <li><div><p><code>checkpoint</code> checks the work itself instead of trusting the report. Did the task stay within its files? Did a test run pass, as recorded by the guard? Does every requirement have a <code>REQ:</code> tag? Are any <code>TODO(rule</code> placeholders left?</p></div></li>
+  </ol>
+
+  <h3>What you see at a checkpoint</h3>
+  <div class="terminal"><pre>S01 T01 · Gate Pass controller (Developer)
+Status: Done ✓ | Slice S01: 1 of 7 tasks done
+
+What was done: Gate Pass checks vehicle number and blocks submit without security sign-off
+Tests: 4 passed, 0 failed
+Requirements covered: FR-001, FR-002
+Files changed (2): …/gate_pass.py, …/test_gate_pass.py
+
+Carried forward:
+  • For the next tasks: factory make_gate_pass(vehicle) in tests/factories.py
+  • To apply once no task is running: hooks.py - doc_events Gate Pass on_submit -> …
+  • For your slice review checklist: Submit a Gate Pass without sign-off: it should be refused
+
+Next: T05 Gate Pass form and list view (UI/UX, running now) · T02 Logic on Purchase Receipt (Developer) · …
+Paused: pause mode is every-task. Say continue to go on.</pre></div>
+  <p>When something needs you, a <em>Needs your attention</em> list appears instead, each point with a suggested action. For example: <em>"No code is marked as implementing FR-003 (<code>REQ:</code> tag missing): either not done or not tagged. → Fix, or Continue if another task covers it."</em></p>
+
+  <h3>Your choices at a pause</h3>
+  <div class="table"><table>
+    <thead><tr><th>Choice</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>Continue</td><td>The task is accepted as is. Any open points stay listed for the slice review</td></tr>
+      <tr><td>Fix with my comment</td><td>Your comment goes to the agent, and the task is checked again</td></tr>
+      <tr><td>Undo the task</td><td>Only this task's files return to the snapshot, and the task starts again. The other line's work is untouched</td></tr>
+      <tr><td>Stop here</td><td>The build stops. Resume later with the same command</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">Schema changes (a new field, a changed DocType) are never made inside a task. The agent asks for them, the architect updates <code>design.yaml</code>, and <code>generate</code> runs again.</div>
+</section>
+
+<section id="review">
+  <h2>Reviewing a checklist</h2>
+  <p>The flows checklist, the plan and every slice checklist all work the same way. Open the file in your editor (Markdown preview shows the diagrams), check each item on the site, then save.</p>
+  <div class="checklist">- [x] <b>A1</b> New fields on Work Order appear in the right place … (http://newproj.localhost:8000/app/work-order/new)
+    - Comment:
+- [ ] <b>B2</b> Defined print formats shall be produced: Raw Material Requisition, Batch Manufacturing Record …
+    - Comment: <span class="rej">BMR print cuts the operations table on page 2</span></div>
+  <ul>
+    <li><strong>Approve:</strong> change <code>[ ]</code> to <code>[x]</code> and leave <em>Comment</em> empty.</li>
+    <li><strong>Reject:</strong> write what is wrong after <code>Comment:</code>. The tick doesn't matter then.</li>
+    <li>Save, then tell Claude <strong>review done</strong>.</li>
+  </ul>
+  <p>Rejected items go to the right agent and come back in the next round with a <em>Fixed:</em> note. Approved items stay approved. Requirement IDs appear only in hidden comments, never in labels users see.</p>
+</section>
+
+<section id="phase4">
+  <h2><span class="op">Phase 4</span>Finish</h2>
+  <ol class="steps">
+    <li><div><p>Full test run of the app on the test site.</p></div></li>
+    <li><div><p>Traceability check: every in-scope requirement must be <em>Verified</em>.</p></div></li>
+    <li><div><p>The Technical Writer writes <code>user-guide/&lt;role&gt;.md</code> per role, following the To-Be processes, plus <code>admin-guide.md</code>.</p></div></li>
+    <li><div><p><code>coverage-report.md</code>: checker output, deferred items with reasons, assumptions still unconfirmed, review rounds per slice, time per step and agent metrics.</p></div></li>
+  </ol>
+</section>
+
+<section id="resume">
+  <h2>Pause and resume</h2>
+  <p>You can stop at any time, close Claude, or hit a usage limit. All state lives in files, so nothing is lost. To continue, start Claude from the bench folder again and run <strong>the same command</strong>. It reads <code>docs/spec/STATUS.md</code> and continues from the first unfinished phase or slice. Approved slices are never rebuilt.</p>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><code>cd ~/path/to/frappe-bench && source ~/.frappe-mcp.env && claude --plugin-dir /home/sanskar/Downloads/frappe-apps-manager/2.1.0
+# then, inside Claude:
+/frappe-apps-manager:frappe-build-from-docs ../requirements/newproj --site newproj.localhost --test-site newproj-test.localhost --app newproj</code></pre></div>
+  <ul>
+    <li>Inside a slice, it picks up at the first task that isn't done, from <code>slices/S03-tasks.yaml</code>.</li>
+    <li>To redo a phase or slice on purpose, add <code>--from 2</code> or <code>--from S05</code>.</li>
+    <li>After updating Frappe or ERPNext, ask Claude to migrate both sites and run the full test suite once before continuing.</li>
+  </ul>
+</section>
+
+<section id="guards">
+  <h2>Safety guards</h2>
+  <p>Four hooks run on their own. A refused action is explained to the agent, which then takes the allowed route.</p>
+  <div class="table"><table>
+    <thead><tr><th>Guard</th><th>Stops</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Destructive commands<br><small>always on</small></td><td><code>drop-site</code>, <code>reinstall</code>, <code>restore</code>, uninstall/remove app, SQL <code>DROP</code>/<code>TRUNCATE</code>/<code>DELETE</code>, <code>rm -r</code> on sites/apps/env, <code>git reset --hard</code>, <code>git clean -f</code>, <code>git push --force</code></td><td>Refused for agents. When the main session runs one, you are asked first</td></tr>
+      <tr><td>Task scope<br><small>while a task runs</small></td><td>Writes outside the task's files · writes past its budget · migrate, install, build or git from an agent · shell writes into <code>apps/</code> (<code>cat &gt;</code>, heredocs, <code>sed -i</code>, inline Python)</td><td>Also records test runs, and stops an agent after the same tests fail 3 times in a row</td></tr>
+      <tr><td>Token savers<br><small>while a task runs</small></td><td>The first read of ERPNext/Frappe DocType JSON in each task points the agent to MCP <code>get_doctype_schema</code> · warns when a shell read prints more than 200 lines</td><td>A repeated read is allowed, so a session without MCP still works</td></tr>
+      <tr><td>Frappe MCP</td><td>Read tools are allowed · deletes are refused · schema writes (Custom Field, DocType, Workflow, Server Script…) are refused, including through <code>call_method</code> · other writes ask you first</td><td>Schema always goes through <code>design.yaml</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>The lint hook also checks every file an agent writes, for example that requirement IDs never appear in user-visible text.</p>
+</section>
+
+<section id="files">
+  <h2>Files it creates</h2>
+  <p>Everything lives inside your app under <code>docs/spec/</code>, so it is versioned with the code.</p>
+  <div class="table"><table>
+    <thead><tr><th>Path</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><code>STATUS.md</code></td><td>Your settings, and every step with start/finish times and notes</td></tr>
+      <tr><td><code>PROGRESS.md</code></td><td>Per slice: done, being fixed, waiting for review, still to develop</td></tr>
+      <tr><td><code>01-requirements.md</code>, <code>02-fit-gap.md</code>, <code>flows.yaml</code></td><td>Requirements register, fit-gap, business flows</td></tr>
+      <tr><td><code>design.yaml</code></td><td>The single design source for every slice</td></tr>
+      <tr><td><code>review/</code></td><td>Flow and plan checklists</td></tr>
+      <tr><td><code>slices/S03-&lt;title&gt;.md</code></td><td>The brief agents work from</td></tr>
+      <tr><td><code>slices/S03-tasks.yaml</code>, <code>S03-tasks/</code></td><td>Task list and status, each task's prompt and report</td></tr>
+      <tr><td><code>slices/S03-&lt;title&gt;-review.md</code></td><td>Your slice checklist</td></tr>
+      <tr><td><code>slices/S03-browser.json</code>, <code>S03-shots/</code></td><td>Browser check results and screenshots</td></tr>
+      <tr><td><code>traceability.md</code>, <code>conventions.md</code></td><td>Requirement-to-code-to-test matrix; patterns later slices copy</td></tr>
+    </tbody>
+  </table></div>
+  <p>Outside the app, in the bench: <code>.claude/frappe-active-task.json</code> (the guard's state while tasks run) and <code>.claude/frappe-agent-metrics.jsonl</code> (one line per agent run).</p>
+</section>
+
+<section id="learn">
+  <h2>Lessons and metrics</h2>
+  <p>The company knowledge base (<code>$FRAPPE_KB_DIR</code>, default <code>~/.claude/frappe-kb</code>) carries what you teach across projects:</p>
+  <ul>
+    <li><code>review-log.jsonl</code>: every item you rejected, with your comment.</li>
+    <li><code>lessons.md</code>: short rules drawn from those rejections, added to every task prompt.</li>
+    <li><code>patterns/</code>: approved slices (brief, design, patch). Later task prompts point to similar ones.</li>
+  </ul>
+  <p>To see where time and effort went:</p>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><code>./env/bin/python /home/sanskar/Downloads/frappe-apps-manager/2.1.0/skills/frappe-slice-builder/scripts/slice_tool.py metrics --app newproj --slice S08</code></pre></div>
+  <p>It lists minutes, tool calls, file writes, test runs and <code>apps/erpnext</code> reads for each agent run. A run with many ERPNext reads usually means MCP wasn't used.</p>
+</section>
+
+<section id="solo">
+  <h2>Skills and agents alone</h2>
+  <p>The full flow is optional. Every agent and skill also works on its own in any Claude session, for example:</p>
+  <ul>
+    <li><em>"Use the frappe-developer agent to add a validation on Sales Order that…"</em></li>
+    <li><code>/frappe-apps-manager:frappe-migrate</code>, <code>/frappe-apps-manager:frappe-test</code>, <code>/frappe-apps-manager:frappe-new-doctype</code></li>
+    <li><em>"Use the frappe MCP to show the fields of Work Order."</em></li>
+  </ul>
+  <p>Outside the flow, no task is active, so the task-scope guard and the token savers stay silent. The destructive-command guard and the MCP guard always apply.</p>
+  <p>The three kinds differ in how you call them:</p>
+  <div class="table"><table>
+    <thead><tr><th>Kind</th><th>What it is</th><th>How to call</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#agents">Agent</a></td><td>A specialist that does a whole job in its own context and reports back</td><td><em>"Use the frappe-&lt;name&gt; agent to…"</em>, or <code>@</code> and pick it</td></tr>
+      <tr><td><a href="#commands">Command</a></td><td>A fixed routine, usually around <code>bench</code></td><td><code>/frappe-apps-manager:&lt;command&gt; …</code></td></tr>
+      <tr><td><a href="#skills">Skill</a></td><td>Know-how for one topic that Claude loads when it fits</td><td>Describe the task, or <code>/frappe-apps-manager:&lt;skill&gt; …</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="agents">
+  <h2>Agents</h2>
+  <p>Agents are specialists that take on a whole piece of work in their own context and report back. The build flow calls them for you; outside it, ask for one by name in plain words, or type <code>@</code> and pick it from the list. <code>/agents</code> shows all 13.</p>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><code>Use the frappe-developer agent to add a validation on Sales Order that blocks credit-limit breaches</code></pre></div>
+  <div class="table"><table>
+    <thead><tr><th>Agent</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-business-analyst</code></td><td>Reads BRD, To-Be and FRS documents and writes the requirements register, fit-gap against ERPNext v16, flows and open questions. Phase 1 of the build flow.</td><td><em>"Use the frappe-business-analyst agent to read ../requirements/newproj and produce the fit-gap"</em></td></tr>
+      <tr><td><code>frappe-product-owner</code></td><td>Turns business needs into app specs, user stories and acceptance criteria.</td><td><em>"Use the frappe-product-owner agent to write user stories for a gate pass process"</em></td></tr>
+      <tr><td><code>frappe-architect</code></td><td>Data model, DocType design, integrations and design.yaml. Phase 2 of the build flow.</td><td><em>"Use the frappe-architect agent to design the DocTypes for job card costing"</em></td></tr>
+      <tr><td><code>frappe-developer</code></td><td>Implements DocTypes, controllers, overrides and services, test-first. The logic line in Phase 3.</td><td><em>"Use the frappe-developer agent to add a validation on Sales Order that blocks credit-limit breaches"</em></td></tr>
+      <tr><td><code>frappe-ui-ux</code></td><td>Form scripts, list views, layouts, print formats, responsive and accessible desk UI. The UI line in Phase 3.</td><td><em>"Use the frappe-ui-ux agent to reorganise the Work Order form into tabs"</em></td></tr>
+      <tr><td><code>frappe-tester</code></td><td>Test strategy, acceptance and E2E tests, Figma design checks. Writes tests from the brief, never fixes product code.</td><td><em>"Use the frappe-tester agent to write acceptance tests for the Gate Pass slice"</em></td></tr>
+      <tr><td><code>frappe-technical-writer</code></td><td>User guides per role, admin guides, API docs. Phase 4 of the build flow.</td><td><em>"Use the frappe-technical-writer agent to write a store-keeper user guide"</em></td></tr>
+      <tr><td><code>frappe-debugger</code></td><td>Diagnoses tracebacks, logs, failing jobs and slow pages.</td><td><em>"Use the frappe-debugger agent to find why Purchase Receipt submit throws a TimestampMismatchError"</em></td></tr>
+      <tr><td><code>frappe-performance</code></td><td>Query optimisation, indexes, caching, profiling and scaling.</td><td><em>"Use the frappe-performance agent to speed up the Stock Ledger report"</em></td></tr>
+      <tr><td><code>frappe-security</code></td><td>Security review, permission design, vulnerability checks on whitelisted methods.</td><td><em>"Use the frappe-security agent to review the API methods in my app"</em></td></tr>
+      <tr><td><code>frappe-data-engineer</code></td><td>Data migration, ETL from legacy systems, data validation, fixtures, DB tuning.</td><td><em>"Use the frappe-data-engineer agent to import 20k items from this CSV"</em></td></tr>
+      <tr><td><code>frappe-integration</code></td><td>Webhooks, external APIs, third-party sync and payment gateways.</td><td><em>"Use the frappe-integration agent to sync Sales Invoices to our accounting API"</em></td></tr>
+      <tr><td><code>frappe-devops</code></td><td>CI/CD pipelines, containers and production deployment.</td><td><em>"Use the frappe-devops agent to set up GitHub Actions that run my app&#x27;s tests"</em></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="commands">
+  <h2>Commands</h2>
+  <p>Commands run a fixed routine. Type the full name with the plugin prefix and add any details after it; if something is missing (site, app), Claude asks.</p>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>/frappe-apps-manager:frappe-build-from-docs ../requirements/newproj --site newproj.localhost --app newproj</code></td><td>Builds an ERPNext v16 app from requirement documents, slice by slice, with your approval at each gate. See <a href="#start">Start a build</a>.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-new-app inventory_plus</code></td><td>Creates a new Frappe app with the standard structure.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-new-doctype Gate Pass in inventory_plus</code></td><td>Creates a DocType (JSON, controller, form script, test) in an app.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-new-site newproj.localhost</code></td><td>Creates a site with its database and config.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-install-app inventory_plus on newproj.localhost</code></td><td>Installs an app on a site.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-bench-start</code></td><td>Starts the bench with the right configuration.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-migrate newproj.localhost</code></td><td>Runs database migrations for a site or app.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-test --app inventory_plus</code></td><td>Runs unit and integration tests with coverage.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-console newproj.localhost</code></td><td>Opens a Python console on a site for queries and debugging.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-logs errors in the last hour</code></td><td>Shows and filters bench, web and worker logs.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-cache clear for newproj.localhost</code></td><td>Clears, inspects and tunes the Redis cache.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-config enable developer_mode</code></td><td>Reads and changes site_config.json values.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-role-manager Store Keeper role</code></td><td>Creates roles, sets DocType permissions, assigns users.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-backup newproj.localhost with files</code></td><td>Backs up a site's database and files.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-db-reset newproj.localhost</code></td><td>Reinstalls a dev site with fresh data and fixtures. Destructive: you confirm first.</td></tr>
+      <tr><td><code>/frappe-apps-manager:frappe-deploy</code></td><td>Deploys apps to a production environment.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note gate"><b>Careful.</b> <code>frappe-db-reset</code> wipes a site and <code>frappe-deploy</code> touches production. The destructive-command guard asks you before either runs anything irreversible.</div>
+</section>
+
+<section id="skills">
+  <h2>Skills</h2>
+  <p>Skills are packaged know-how: rules, reference and scripts for one topic. There are 93. You can call them three ways:</p>
+  <ul>
+    <li><strong>Automatically.</strong> Just describe the task. Claude loads the matching skill on its own, e.g. <em>"my doc_events hook never fires"</em> loads <code>frappe-errors-hooks</code>.</li>
+    <li><strong>By slash command.</strong> <code>/frappe-apps-manager:&lt;skill-name&gt;</code> followed by your request.</li>
+    <li><strong>By name.</strong> <em>"Use the frappe-print-format-builder skill to…"</em> when you want a specific one.</li>
+  </ul>
+  <div class="code"><button class="copy" type="button">Copy</button><pre><code>/frappe-apps-manager:frappe-print-format-builder Print format for Gate Pass with a signature block</code></pre></div>
+  <div class="filter"><label for="skill-filter">Filter skills</label><input id="skill-filter" type="search" placeholder="e.g. print, permission, test" autocomplete="off"><span id="skill-count" aria-live="polite"></span></div>
+  <div class="skill-group">
+  <h3>Requirements, planning and docs</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-requirements-analyst</code></td><td>Turn BRD / FRS / To-Be documents into a requirements register with IDs and a fit-gap.</td><td><em>"Analyse the BRD in ../requirements and classify each requirement against ERPNext"</em></td></tr>
+      <tr><td><code>frappe-slice-builder</code></td><td>Write design.yaml, generate DocTypes and stubs from it, slice briefs, browser check, review checklists.</td><td><em>"Generate slice S02 from design.yaml"</em></td></tr>
+      <tr><td><code>frappe-traceability</code></td><td>Keep the requirement → code → test matrix and check coverage before sign-off.</td><td><em>"Which requirements are not yet verified?"</em></td></tr>
+      <tr><td><code>frappe-agent-interpreter</code></td><td>Turn a vague ask into a concrete technical spec and the Frappe mechanism to use.</td><td><em>&quot;Make invoices auto-calculate commission&quot;: how should we build this?</em></td></tr>
+      <tr><td><code>frappe-architect</code></td><td>Guidelines for data modelling, app structure and integrations.</td><td><em>"Should this be a child table or a separate DocType?"</em></td></tr>
+      <tr><td><code>frappe-concept-explainer</code></td><td>Explain Frappe / ERPNext concepts and conventions.</td><td><em>"Explain how naming series and autoname work"</em></td></tr>
+      <tr><td><code>frappe-documentation-generator</code></td><td>API docs, user guides, OpenAPI specs.</td><td><em>"Generate API docs for my whitelisted methods"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>App structure, DocTypes and server logic</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-app-scaffold</code></td><td>Reference folder tree of a <code>bench new-app</code> app (pyproject, modules).</td><td><em>"What files should a new app have?"</em></td></tr>
+      <tr><td><code>frappe-doctype-builder</code></td><td>A complete DocType: JSON, Python controller and JS form script.</td><td><em>"Create a Vehicle Log DocType with these fields…"</em></td></tr>
+      <tr><td><code>frappe-document-hooks</code></td><td>Lifecycle hooks on existing DocTypes without touching core.</td><td><em>"Run code when a Delivery Note is submitted"</em></td></tr>
+      <tr><td><code>frappe-hooks</code></td><td>Everything in hooks.py: doc_events, scheduler, overrides, fixtures, boot.</td><td><em>"Add a daily scheduler job to my hooks.py"</em></td></tr>
+      <tr><td><code>frappe-syntax-hooks-events</code></td><td>Document event names and the order they fire in.</td><td><em>"Does validate run before before_save?"</em></td></tr>
+      <tr><td><code>frappe-monkey-patching</code></td><td>Override core methods and classes safely.</td><td><em>"Override ERPNext&#x27;s get_item_details"</em></td></tr>
+      <tr><td><code>frappe-state-machine-helper</code></td><td>Status logic and allowed transitions inside a controller.</td><td><em>"Add Draft → Approved → Closed status rules"</em></td></tr>
+      <tr><td><code>frappe-workflow-generator</code></td><td>Workflow DocTypes for approvals and states.</td><td><em>"Two-level approval workflow on Material Request"</em></td></tr>
+      <tr><td><code>frappe-background-jobs</code></td><td>frappe.enqueue, RQ queues and scheduled tasks.</td><td><em>"Move this slow PDF generation into a background job"</em></td></tr>
+      <tr><td><code>frappe-patch-generator</code></td><td>One-time patches run on migrate.</td><td><em>"Write a patch that back-fills the new region field"</em></td></tr>
+      <tr><td><code>frappe-fixture-creator</code></td><td>Fixtures for master data and test data.</td><td><em>"Export my custom roles and Custom Fields as fixtures"</em></td></tr>
+      <tr><td><code>frappe-virtual-doctype</code></td><td>DocTypes whose data comes from code or an external API.</td><td><em>"Show records from our HR API as a virtual DocType"</em></td></tr>
+      <tr><td><code>frappe-utils-api</code></td><td>frappe.utils helpers: dates, numbers, formatting, conversion.</td><td><em>"Get the last working day of the month"</em></td></tr>
+      <tr><td><code>frappe-impl-serverscripts</code></td><td>Build features with Server Scripts (Setup → Server Script).</td><td><em>"Auto-fill territory on Customer with a server script"</em></td></tr>
+      <tr><td><code>frappe-syntax-serverscripts</code></td><td>Correct Server Script syntax and sandbox rules (no imports).</td><td><em>"Why is import not allowed in my server script?"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Data and database</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-database-orm</code></td><td>Safe reads and writes: get_doc, get_all, db.get_value, parameterised SQL, transactions.</td><td><em>"Fetch all open orders for a customer without N+1 queries"</em></td></tr>
+      <tr><td><code>frappe-syntax-query-builder</code></td><td>frappe.qb queries: joins, aggregates, subqueries.</td><td><em>"Rewrite this raw SQL with frappe.qb"</em></td></tr>
+      <tr><td><code>frappe-data-migration-generator</code></td><td>Scripts to move data from legacy systems.</td><td><em>"Migrate customers from our old MySQL database"</em></td></tr>
+      <tr><td><code>frappe-core-cache</code></td><td>Redis caching, invalidation and locks.</td><td><em>"Cache this settings lookup and clear it on save"</em></td></tr>
+      <tr><td><code>frappe-performance-optimizer</code></td><td>Faster queries, indexes and caching.</td><td><em>"Add the right index for this slow report"</em></td></tr>
+      <tr><td><code>frappe-core-search</code></td><td>Link field search, global search, full-text search.</td><td><em>"Make Item link search by barcode too"</em></td></tr>
+      <tr><td><code>frappe-core-files</code></td><td>Uploads, attachments, private/public files, S3.</td><td><em>"Attach the generated PDF privately to the document"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Desk UI and forms</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-client-script-generator</code></td><td>JS form scripts: buttons, field validation, client logic.</td><td><em>"Add a &quot;Create Gate Pass&quot; button on Delivery Note"</em></td></tr>
+      <tr><td><code>frappe-client-script-logic</code></td><td>Dynamic form behaviour and field dependencies.</td><td><em>"Hide the discount field unless the customer is wholesale"</em></td></tr>
+      <tr><td><code>frappe-form-layout-optimizer</code></td><td>Sections, columns and tabs for clearer forms.</td><td><em>"Reorganise this 60-field form"</em></td></tr>
+      <tr><td><code>frappe-impl-ui-components</code></td><td>Dialogs, list view tweaks, pages, Kanban, Calendar.</td><td><em>"Open a dialog to pick batches before submit"</em></td></tr>
+      <tr><td><code>frappe-ux-feedback-handler</code></td><td>Alerts, progress bars, confirmations.</td><td><em>"Show a progress bar while invoices are created"</em></td></tr>
+      <tr><td><code>frappe-realtime-handler</code></td><td>Live updates with socket.io and publish_realtime.</td><td><em>"Refresh the form when a background job finishes"</em></td></tr>
+      <tr><td><code>frappe-mobile-optimizer</code></td><td>Touch-friendly, responsive layouts.</td><td><em>"Make the stock entry form usable on a phone"</em></td></tr>
+      <tr><td><code>frappe-vue-component-integrator</code></td><td>Vue 3 components in pages, views or dialogs.</td><td><em>"Add a Vue scheduling board to a Frappe page"</em></td></tr>
+      <tr><td><code>frappe-web-tool-porter</code></td><td>Bring jQuery plugins or standalone HTML tools into Frappe.</td><td><em>"Port this HTML floor-plan tool into a desk page"</em></td></tr>
+      <tr><td><code>frappe-desk-branding</code></td><td>Colours, logo, login page, navbar settings.</td><td><em>"Apply our brand colour and logo to the desk"</em></td></tr>
+      <tr><td><code>frappe-workspace-builder</code></td><td>Workspace shortcuts, cards, charts and sidebar.</td><td><em>"Create a Stores workspace with shortcuts"</em></td></tr>
+      <tr><td><code>frappe-dashboard-builder</code></td><td>Dashboards, charts and number cards.</td><td><em>"Dashboard with monthly dispatch count and value"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Reports, prints and templates</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-report-builder</code></td><td>Report Builder, Query and Script reports.</td><td><em>"A query report of pending deliveries by customer"</em></td></tr>
+      <tr><td><code>frappe-report-generator</code></td><td>Script/query reports with filters, charts and JS.</td><td><em>"Script report with a warehouse filter and a bar chart"</em></td></tr>
+      <tr><td><code>frappe-print-format-builder</code></td><td>Custom print formats with Jinja and CSS.</td><td><em>"Print format for Gate Pass with a signature block"</em></td></tr>
+      <tr><td><code>frappe-impl-jinja</code></td><td>Print, email and notification templates end to end.</td><td><em>"Email template for overdue invoices with the items table"</em></td></tr>
+      <tr><td><code>frappe-syntax-jinja</code></td><td>Jinja syntax, context variables and filters.</td><td><em>"How do I loop over the items table in a print format?"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Website and portal</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-portal-generator</code></td><td>Portal pages and web routes.</td><td><em>"A customer portal page listing their orders"</em></td></tr>
+      <tr><td><code>frappe-web-form-builder</code></td><td>Public web forms.</td><td><em>"A supplier registration web form"</em></td></tr>
+      <tr><td><code>frappe-ops-website-deploy</code></td><td>Publish HTML/CSS as Web Pages through the API.</td><td><em>"Deploy this landing page to our ERPNext site"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Notifications, translation and logging</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-core-notifications</code></td><td>Emails, Notification DocType, assignment rules, auto repeat.</td><td><em>"Email the approver when a Material Request is submitted"</em></td></tr>
+      <tr><td><code>frappe-core-translation</code></td><td>_() / __() strings, translation files, RTL.</td><td><em>"Add Arabic translations to my app"</em></td></tr>
+      <tr><td><code>frappe-core-logging</code></td><td>frappe.logger, Error Log, Sentry.</td><td><em>"Log every failed sync with the payload"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>APIs, integrations and security</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-rest-api</code></td><td>/api/resource and /api/method, token auth, uploads.</td><td><em>"Call Frappe from Python with an API key"</em></td></tr>
+      <tr><td><code>frappe-api-handler</code></td><td>Whitelisted methods and REST endpoints.</td><td><em>"Expose an endpoint that returns stock by item"</em></td></tr>
+      <tr><td><code>frappe-external-api-connector</code></td><td>Call third-party REST APIs from Frappe.</td><td><em>"Fetch exchange rates from an external API daily"</em></td></tr>
+      <tr><td><code>frappe-webhook-manager</code></td><td>Send and receive webhooks.</td><td><em>"Receive payment webhooks from our gateway"</em></td></tr>
+      <tr><td><code>frappe-permissions</code></td><td>Roles, perm levels, user permissions, permission query hooks.</td><td><em>"Sales users should only see their own territory&#x27;s orders"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Testing</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-tdd-tests</code></td><td>Red-green-refactor for DocTypes and controllers.</td><td><em>"Add this rule test-first"</em></td></tr>
+      <tr><td><code>frappe-testing-unit</code></td><td>IntegrationTestCase, fixtures, <code>bench run-tests</code> flags.</td><td><em>"Why is my test failing only when run with the others?"</em></td></tr>
+      <tr><td><code>frappe-unit-test-generator</code></td><td>Unit tests for DocTypes, controllers, APIs.</td><td><em>"Write tests for gate_pass.py"</em></td></tr>
+      <tr><td><code>frappe-integration-test-generator</code></td><td>Tests across several DocTypes or services.</td><td><em>"Test Sales Order → Delivery Note → Invoice"</em></td></tr>
+      <tr><td><code>frappe-e2e-tests</code></td><td>Container-based end-to-end tests.</td><td><em>"E2E test of the order flow across services"</em></td></tr>
+      <tr><td><code>frappe-ui-testing</code></td><td>Cypress tests with page objects and Figma checks.</td><td><em>"Cypress test for the Gate Pass form"</em></td></tr>
+      <tr><td><code>frappe-test-planner</code></td><td>Test plans, manual cases, regression suites, bug reports.</td><td><em>"Write a UAT test plan for the stores module"</em></td></tr>
+      <tr><td><code>frappe-testing-cicd</code></td><td>GitHub Actions, lint, semgrep, pre-commit.</td><td><em>"Add CI that runs tests and ruff on every PR"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Debugging and errors</h3>
+  <p class="sub">Each error skill maps error messages to fixes for one area.</p>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-agent-debugger</code></td><td>Tracebacks, logs, bench console, profiling, Recorder.</td><td><em>"Help me read this traceback"</em></td></tr>
+      <tr><td><code>frappe-errors-api</code></td><td>401 / 403 / 404 / 417 / 500, CORS and CSRF errors.</td><td><em>"My API call returns 403 Forbidden"</em></td></tr>
+      <tr><td><code>frappe-errors-clientscripts</code></td><td>JS errors in form scripts.</td><td><em>"Cannot read properties of undefined in my client script"</em></td></tr>
+      <tr><td><code>frappe-errors-controllers</code></td><td>Save, validate, submit and autoname failures.</td><td><em>"on_submit never runs"</em></td></tr>
+      <tr><td><code>frappe-errors-database</code></td><td>Duplicate entry, timestamp mismatch, deadlocks, MariaDB errors.</td><td><em>"DuplicateEntryError when importing items"</em></td></tr>
+      <tr><td><code>frappe-errors-hooks</code></td><td>Hooks not firing, scheduler not running, overrides ignored.</td><td><em>"My doc_events hook never fires"</em></td></tr>
+      <tr><td><code>frappe-errors-permissions</code></td><td>PermissionError, user permissions that block too much.</td><td><em>"User can&#x27;t open documents they created"</em></td></tr>
+      <tr><td><code>frappe-errors-serverscripts</code></td><td>Server Script ImportError, sandbox and NameError.</td><td><em>"ImportError in my server script"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Bench, upgrades and deployment</h3>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-ops-bench</code></td><td>Bench commands, sites, multi-tenancy, domains.</td><td><em>"Add a domain to a site"</em></td></tr>
+      <tr><td><code>frappe-ops-backup</code></td><td>Backups, restores, encryption, disaster recovery.</td><td><em>"Schedule encrypted daily backups to S3"</em></td></tr>
+      <tr><td><code>frappe-ops-upgrades</code></td><td>Major version upgrades and rollback.</td><td><em>"Plan an upgrade from v15 to v16"</em></td></tr>
+      <tr><td><code>frappe-agent-migrator</code></td><td>Find deprecated or removed APIs in an app before upgrading.</td><td><em>"Check my app for v16 breaking changes"</em></td></tr>
+      <tr><td><code>frappe-ops-frontend-build</code></td><td>esbuild bundles, SCSS, <code>bench build</code> problems.</td><td><em>"My CSS changes don&#x27;t show up after bench build"</em></td></tr>
+      <tr><td><code>frappe-ops-cloud</code></td><td>Frappe Cloud and the Press API.</td><td><em>"Deploy my app to Frappe Cloud"</em></td></tr>
+      <tr><td><code>frappe-git-publish</code></td><td>Commit generated code and push it to GitHub.</td><td><em>"Commit this slice and push to a new GitHub repo"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Containers and SNE images</h3>
+  <p class="sub">For container-based development using vyogo SNE (all-in-one) images.</p>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-sne-runner</code></td><td>Run Frappe/ERPNext locally in one SNE container.</td><td><em>"Set up a local ERPNext with SNE"</em></td></tr>
+      <tr><td><code>frappe-custom-app-dev</code></td><td>Develop a custom app against SNE with volume mounts.</td><td><em>"Mount my app into the SNE container"</em></td></tr>
+      <tr><td><code>frappe-compose-dev-generator</code></td><td>compose.yml for SNE development.</td><td><em>"Generate a compose file for my app"</em></td></tr>
+      <tr><td><code>frappe-containerfile-generator</code></td><td>Containerfile on official frappe/erpnext images with Gunicorn.</td><td><em>"Write a Containerfile for production"</em></td></tr>
+      <tr><td><code>frappe-sne-image-builder</code></td><td>Build bootable SNE images with S2I.</td><td><em>"Build an SNE image that includes my app"</em></td></tr>
+      <tr><td><code>frappe-app-installation-validator</code></td><td>Check an app installs and migrates cleanly in a container.</td><td><em>"Validate that my app installs on a fresh site"</em></td></tr>
+      <tr><td><code>frappe-add-service-compose</code></td><td>Add a microservice to dev-podman-compose.yml.</td><td><em>"Add the billing service to the compose file"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <div class="skill-group">
+  <h3>Microservices and multi-tenancy</h3>
+  <p class="sub">For apps built on frappe-microservice-lib.</p>
+  <div class="table"><table>
+    <thead><tr><th>Skill</th><th>Use it for</th><th>Example ask</th></tr></thead>
+    <tbody>
+      <tr><td><code>frappe-microservice-pattern</code></td><td>Bounded contexts and multi-tenancy patterns explained.</td><td><em>"How should orders and billing be split?"</em></td></tr>
+      <tr><td><code>frappe-microservice-scaffold</code></td><td>New microservice boilerplate with tenant isolation.</td><td><em>"Scaffold an inventory microservice"</em></td></tr>
+      <tr><td><code>frappe-microservice-validator</code></td><td>Check code against the library's patterns and security rules.</td><td><em>"Validate the billing service"</em></td></tr>
+      <tr><td><code>frappe-controller</code></td><td>DocType controllers with lifecycle methods for microservices.</td><td><em>"Controller for Invoice in the billing service"</em></td></tr>
+      <tr><td><code>frappe-secure-endpoint</code></td><td>Authenticated, tenant-aware API endpoints.</td><td><em>"Secure endpoint to list a tenant&#x27;s invoices"</em></td></tr>
+      <tr><td><code>frappe-tenant-query</code></td><td>Tenant-isolated queries with TenantAwareDB.</td><td><em>"Query orders for the current tenant only"</em></td></tr>
+    </tbody>
+  </table></div>
+  </div>
+  <p id="skill-none" hidden>No skill matches. Try a shorter word, or just describe the task and let Claude pick.</p>
+</section>
+
+<section id="trouble">
+  <h2>Troubleshooting</h2>
+  <div class="table"><table>
+    <thead><tr><th>You see</th><th>Cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>No <em>AI Agents</em> tab in System Settings</td><td>Frappe older than 16.53</td><td>Back up both sites, then <code>bench update --pull --apps frappe erpnext --no-backup</code>, migrate both sites and check <code>bench version</code></td></tr>
+      <tr><td><code>"Only POST is supported"</code> in the browser</td><td>Normal: browsers send GET</td><td>Test with the <code>curl</code> POST in <a href="#setup">setup</a></td></tr>
+      <tr><td><code>/mcp</code> shows ✘ for <code>plugin:frappe-apps-manager:frappe</code></td><td>Keys not set in the terminal that started Claude, or keys from another site</td><td>Run <code>source ~/.frappe-mcp.env</code> in that terminal and restart Claude. Check the site in <code>FRAPPE_SITE_URL</code></td></tr>
+      <tr><td><em>"Not a Frappe bench directory"</em></td><td>Claude was started outside the bench</td><td><code>cd</code> into the bench folder, then start Claude</td></tr>
+      <tr><td>Changes to the plugin have no effect</td><td>Claude loads an older installed copy</td><td>Use <code>--plugin-dir</code>, or raise the version and reinstall</td></tr>
+      <tr><td>Agents still read <code>apps/erpnext</code> a lot</td><td>MCP not connected in that session</td><td>Check <code>/mcp</code>, then <code>slice_tool.py metrics</code> after the slice</td></tr>
+      <tr><td>A checkpoint flags files the task doesn't own</td><td>The task really touched another task's file</td><td>Choose Undo, or Continue if the change was needed</td></tr>
+      <tr><td>Agent stopped: tests failed 3 times</td><td>It is stuck on the same failure</td><td>Fix with my comment and give it a hint, or Continue and leave it to the Tester</td></tr>
+      <tr><td>Browser check can't log in</td><td><code>FRAPPE_PASSWORD</code> not set</td><td>Add it to <code>~/.frappe-mcp.env</code> and restart Claude</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  frappe-apps-manager · <code>/frappe-build-from-docs</code> guide. Covers the slice builder with task checkpoints, guards, Frappe MCP and the company knowledge base, plus a reference for every agent, command and skill.
+</footer>
+
+</main>
+</div>
+
+<script>
+(function () {
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.parentElement.querySelector("pre");
+      var text = pre.innerText;
+      function done(msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
+      function select() {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        done("Selected");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done("Copied"); }, select);
+      } else { select(); }
+    });
+  });
+
+  var filter = document.getElementById("skill-filter");
+  if (filter) {
+    var groups = Array.prototype.slice.call(document.querySelectorAll("#skills .skill-group"));
+    var count = document.getElementById("skill-count");
+    var none = document.getElementById("skill-none");
+    var total = document.querySelectorAll("#skills tbody tr").length;
+    function apply() {
+      var q = filter.value.trim().toLowerCase();
+      var shown = 0;
+      groups.forEach(function (g) {
+        var inGroup = 0;
+        var title = g.querySelector("h3").textContent.toLowerCase();
+        g.querySelectorAll("tbody tr").forEach(function (tr) {
+          var hit = !q || tr.textContent.toLowerCase().indexOf(q) !== -1 || title.indexOf(q) !== -1;
+          tr.hidden = !hit;
+          if (hit) inGroup++;
+        });
+        g.hidden = inGroup === 0;
+        shown += inGroup;
+      });
+      count.textContent = q ? shown + " of " + total : total + " skills";
+      none.hidden = shown !== 0;
+    }
+    filter.addEventListener("input", apply);
+    apply();
+  }
+
+  var links = Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+  if ("IntersectionObserver" in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && byId[e.target.id]) {
+          links.forEach(function (a) { a.classList.remove("on"); });
+          byId[e.target.id].classList.add("on");
+        }
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    document.querySelectorAll("main section[id]").forEach(function (s) { obs.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
